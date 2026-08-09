@@ -1,0 +1,11 @@
+.claude
+.Cours avec claude
+.env
+docs/cahier-des-charges.md
+docs/schema-mongodb.md
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
