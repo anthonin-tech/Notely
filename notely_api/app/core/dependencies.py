@@ -17,6 +17,8 @@ async def get_current_user(credentials=Depends(oauth2_scheme)) -> User:
     user_id = payload.get("sub")
     user = await User.get(user_id)
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Utilisateur introuvable")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Utilisateur introuvable"
+        )
 
     return user
