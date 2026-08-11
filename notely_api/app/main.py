@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException
 from app.db.mongodb import init_db
 from app.models.user import User
 from app.routers.auth_router import router as auth_router
+from app.routers.notes_router import router as note_router
 
 
 @asynccontextmanager
@@ -27,3 +28,4 @@ async def health():
 
 
 app.include_router(auth_router)
+app.include_router(note_router)

@@ -25,3 +25,19 @@ async def clean_db():
     yield
     await User.delete_all()
     await Note.delete_all()
+
+
+@pytest.fixture
+async def register(client):
+    response = await client.post(
+        "/register", json={"email": "email@gmail.com", "password": "Fexxxoy01"}
+    )
+    return response
+
+
+@pytest.fixture
+async def login(client, register):
+    response = await client.post(
+        "/login", json={"email": "email@gmail.com", "password": "Fexxxoy01"}
+    )
+    return response
