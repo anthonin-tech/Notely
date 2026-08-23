@@ -1,9 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.dependencies import get_current_user
+from app.core.config import settings
 from app.models.note import Note
 from app.models.user import User
 from app.schemas.note_schema import NoteCreate, NoteOut, NoteUpdate
+
+from app.services.llm_service import (
+    LLMMalformedResponseError,
+    LLMTimeoutError,
+    LLMUnavailableError,
+    generate_summary,
+)
+from datetime import datetime, timezone
 
 router = APIRouter()
 
@@ -71,3 +80,29 @@ async def delete_note(note_id: str, current_user: User = Depends(get_current_use
             status_code=403, detail="Vous n'êtes pas autorisé d'accéder à cette note"
         )
     await note.delete()
+
+
+@router.post("/notes/{note_id}/summarize", response_model=NoteOut)
+async def summarize_note(note_id: str, current_user: User = Depends(get_current_user)):
+    note = await Note.get(note_id)
+    if note is None:
+        raise HTTPException(status_code=404, detail="Note non trouvé")
+    elif note.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Vous n'êtes pas autorisé d'accéder à ceette note"
+        )
+
+    try:
+        summary = await generate_summary(note.content)
+    except LLMUnavailableError:
+        raise HTTPException(status_code=503, detail="Service LLM indisponible")
+    except LLMTimeoutError:
+        raise HTTPException(status_code=504, detail="Le LLM a mis trop de temps à répondre")
+    except LLMMalformedResponseError:
+        raise HTTPException(status_code=502, detail="Réponse du LLM invalide")
+
+    note.summary_text = summary
+    note.summary_model = settings.ollama_model
+    note.summary_generated_at = datetime.now(timezone.utc)
+    await note.save()
+    return note
