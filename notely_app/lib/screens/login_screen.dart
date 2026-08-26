@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:notely_app/screens/notes_list_screen.dart';
 
 import '../providers/auth_provider.dart';
 import '../screens/register_screen.dart';
@@ -17,6 +18,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.token != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const NotesListScreen()),
+        );
+      }
+    });
+
     final authState = ref.watch(authProvider);
 
     return Scaffold(

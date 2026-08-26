@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notely_app/screens/login_screen.dart';
 
 import '../providers/auth_provider.dart';
+import '../screens/notes_list_screen.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -17,6 +18,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.token != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const NotesListScreen()),
+        );
+      }
+    });
+
     final authState = ref.watch(authProvider);
 
     return Scaffold(
@@ -57,9 +67,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               },
               child: const Text("Vous avez déjà un compte ? Se connecter"),
